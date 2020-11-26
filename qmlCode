@@ -1,0 +1,124 @@
+Rectangle
+{
+    id: idAccelerometerBox
+    color: "yellow"
+    x:0
+    y:0
+    width: Screen.width/4
+    height: 75;
+
+    Text
+    {
+        id: idTxtAxisX
+        text: qsTr("X:")
+        font.pixelSize: 14
+        font.bold: true
+        objectName: "txtAccelX"
+        x:0
+        y:0
+
+        TextInput
+        {
+            id: idTxtInputAxisX
+            cursorVisible: false
+            text: "0"
+            font.pixelSize: 14
+            x:idTxtAxisX.width   /*idTxtAxisX.x + 100*/
+            y:0                  /*idTxtAxisX.y*/
+            objectName: "txtInputAccelX"
+
+            signal qmlReceiveAccelX(string textIn)
+            onQmlReceiveAccelX:
+            {
+                console.log("onQmlReceiveAccelX:"+textIn)
+                text = textIn
+            }
+        }
+    }
+    Text
+    {
+        id:idTxtAxisY
+        x:0
+        y:idTxtAxisX.height
+        text: qsTr("Y:")
+        font.pixelSize: 14
+        font.bold: true
+        objectName: "txtAccelY"
+
+        TextInput
+        {
+            id:idTxtInputAxisY
+            x: idTxtAxisY.width
+            y: 0
+            text: "0"
+            font.pixelSize: 14
+            cursorVisible: false
+            objectName: "txtInputAccelY"
+
+            signal qmlReceiveAccelY(string textIn)
+            onQmlReceiveAccelY:
+            {
+                console.log("onQmlReceiveAccelY:"+textIn)
+                text = textIn
+            }
+        }
+    }
+
+    Text
+    {
+        id: idTxtAxisZ
+        x: 0
+        y: idTxtAxisX.height+idTxtAxisY.height
+        text: qsTr("Z:")
+        font.pixelSize: 14
+        font.bold: true
+        objectName: "txtAccelZ"
+
+        TextInput
+        {
+            id: idTxtInputAxisZ
+            x: idTxtAxisZ.width
+            y: 0
+            text: "0"
+            font.pixelSize: 14
+            cursorVisible: false
+            objectName: "txtInputAccelZ"
+
+            signal qmlReceiveAccelZ(string textIn)
+            onQmlReceiveAccelZ:
+            {
+                console.log("onQmlReceiveAccelZ:"+textIn)
+                text = textIn
+            }
+        }
+    }
+
+    /*ChartView {
+        id: line
+        x: 0
+        y: 150
+        width: 800
+        height: 200
+        objectName: "LineSeries"
+
+        signal qmlReceiveLineSeries(real X,real Y)
+        onQmlReceiveLineSeries:
+        {
+            console.log("onQmlReceiveLineSeries:"+x+","+y)
+            new XYPoint(x = X, y = Y)
+        }
+
+        LineSeries {
+            name: "LineSeries"
+            objectName: "LineSeries"
+            width: 400
+
+            signal qmlReceiveLineSeries(real X,real Y)
+            onQmlReceiveLineSeries:
+            {
+                console.log("onQmlReceiveLineSeries:"+x+","+y)
+                new XYPoint(x = X, y = Y)
+            }
+        }
+    }*/
+}

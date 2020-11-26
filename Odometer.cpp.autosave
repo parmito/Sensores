@@ -1,0 +1,7 @@
+#include "Odometer.h"
+
+Odometer::Odometer(QWidget *parent) : QLCDNumber(parent)
+{
+    setMode(QLCDNumber::Dec);
+    setSegmentStyle(Filled);
+}

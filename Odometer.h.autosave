@@ -1,0 +1,14 @@
+#ifndef ODOMETER_H
+#define ODOMETER_H
+
+#include <QLCDNumber>
+#include <QWidget>
+
+class Odometer : public QLCDNumber
+{
+    Q_OBJECT
+public:
+    explicit Odometer(QWidget *parent = nullptr);
+};
+
+#endif // ODOMETER_H
