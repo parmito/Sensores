@@ -29,6 +29,7 @@ InstrumentPanel::InstrumentPanel(QWidget *parent) : QWidget(parent)
     iCurrentSpeed = 0;
     iAvgSpeed = 0;
     iMaxSpeed = 0;
+    lNumberOfSamples = 1;
 
     checkBoxSound = new QCheckBox("Sound ON",this);
 
@@ -99,6 +100,7 @@ InstrumentPanel::InstrumentPanel(QWidget *parent) : QWidget(parent)
     Odometer->setMode(QLCDNumber::Dec);
     Odometer->setDigitCount(6);
     Odometer->setParent(this);
+
 
     /*selectSpeed->setParent(this);*/
 }
@@ -179,7 +181,21 @@ void InstrumentPanel::SlotReceiveSpeed(QString value)
 {
     speed = value;
     iCurrentSpeed = speed.toInt();
-    iAvgSpeed = (iAvgSpeed + iCurrentSpeed)/2;
+
+    if((iCurrentSpeed > 0) && (lNumberOfSamples > 0))
+    {
+        iAvgSpeed = ((lNumberOfSamples-1)*iAvgSpeed +iCurrentSpeed)/lNumberOfSamples;
+        lNumberOfSamples++;
+    }
+    else
+    {
+        if(lNumberOfSamples == 0)
+        {
+            lNumberOfSamples++;
+            iAvgSpeed = ((lNumberOfSamples-1)*iAvgSpeed +iCurrentSpeed)/lNumberOfSamples;
+            lNumberOfSamples++;
+        }
+    }
 
     /*static int i = 0;
     spanAngle = -(i) * ((225/210)*16);
@@ -189,32 +205,56 @@ void InstrumentPanel::SlotReceiveSpeed(QString value)
     if (iCurrentSpeed > iMaxSpeed)
     {
         iMaxSpeed = iCurrentSpeed;
-        spanAngleMaxSpeed = -iMaxSpeed * ((264/210)*16);
     }
 
     if(iCurrentSpeed >=100)
     {
         speedTextPosition = QRect(-160 , 130, 700, 700);
-        MaxSpeedTextPosition = QRect(-90 , 25, 700, 700);
-        AvgSpeedTextPosition = QRect(-90 , 90, 700, 700);
-
     }
     else
     {
         if(iCurrentSpeed >=10)
         {
             speedTextPosition = QRect(-100 , 130, 700, 700);
-            MaxSpeedTextPosition = QRect(-70 , 25, 700, 700);
-            AvgSpeedTextPosition = QRect(-70 , 90, 700, 700);
-
         }
         else
         {
             speedTextPosition = QRect(-60 , 130, 700, 700);
-            MaxSpeedTextPosition = QRect(-30 , 25, 700, 700);
+        }
+    }
+
+    if(iAvgSpeed >=100)
+    {
+        AvgSpeedTextPosition = QRect(-60 , 90, 700, 700);
+    }
+    else
+    {
+        if(iAvgSpeed >=10)
+        {
+            AvgSpeedTextPosition = QRect(-40 , 90, 700, 700);
+        }
+        else
+        {
             AvgSpeedTextPosition = QRect(-30 , 85, 700, 700);
         }
     }
+
+    if(iMaxSpeed >=100)
+    {
+        MaxSpeedTextPosition = QRect(-60 , 25, 700, 700);
+    }
+    else
+    {
+        if(iMaxSpeed >=10)
+        {
+            MaxSpeedTextPosition = QRect(-40 , 25, 700, 700);
+        }
+        else
+        {
+            MaxSpeedTextPosition = QRect(-30 , 25, 700, 700);
+        }
+    }
+
 
     int iThresholdSpeed;
     switch (selectSpeed->currentIndex())
@@ -262,14 +302,14 @@ void InstrumentPanel::SlotReceiveSpeed(QString value)
     }
     spanAngle = -(iCurrentSpeed) * ((264/210)*16);
     spanAngleAvgSpeed = -(iAvgSpeed) * ((264/210)*16);
-
+    spanAngleMaxSpeed = -iMaxSpeed * ((264/210)*16);
 
     strMaxSpeed = QString::number(iMaxSpeed);
     strAvgSpeed = QString::number(iAvgSpeed);
     update();
 }
 
-void InstrumentPanel::SlotReceiveDistance(long distance)
+void InstrumentPanel::SlotReceiveDistance(double distance)
 {
     dOdometer +=distance;
 }

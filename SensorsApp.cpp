@@ -2,7 +2,7 @@
 #include "SensorsApp.h"
 #include <QDebug>
 #include <QGeoSatelliteInfoSource>
-
+#include <QRandomGenerator>
 
 SensorsApp::SensorsApp(QObject *parent)
     : QObject(parent)
@@ -174,7 +174,7 @@ void SensorsApp::positionUpdated(const QGeoPositionInfo &info)
     {
         if((CurrentLatitude != PreviousLatitude) || (CurrentLongitude != PreviousLongitude))
         {
-            lDistance = distance(PreviousLatitude, PreviousLongitude,
+            dDistance = distance(PreviousLatitude, PreviousLongitude,
                                  CurrentLatitude, CurrentLongitude);
         }
     }
@@ -182,12 +182,15 @@ void SensorsApp::positionUpdated(const QGeoPositionInfo &info)
     PreviousLatitude = CurrentLatitude;
     PreviousLongitude= CurrentLongitude;
 
+#ifdef QT_DEBUG
+    speed = QRandomGenerator::global()->bounded(220);
+#endif
     emit SensorsApp::cppSendTimestamp(Time.toString());
     emit SensorsApp::cppSendLatitude(QString::number(CurrentLatitude));
     emit SensorsApp::cppSendLongitude(QString::number(CurrentLongitude));
     emit SensorsApp::cppSendAltitude(QString::number(altitude));
     emit SensorsApp::cppSendSpeed(QString::number(speed));    
-    emit SensorsApp::cppSendDistance(lDistance);
+    emit SensorsApp::cppSendDistance(dDistance);
 }
 
 void SensorsApp::temperatureUpdated()

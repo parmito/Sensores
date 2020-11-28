@@ -293,8 +293,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(sensor, SIGNAL(cppSendSpeed(QString)),
                      cluster, SLOT(SlotReceiveSpeed(QString)));
 
-    connect(sensor, SIGNAL(cppSendDistance(long)),
-                     cluster, SLOT(SlotReceiveDistance(long)));
+    connect(sensor, SIGNAL(cppSendDistance(double)),
+                     cluster, SLOT(SlotReceiveDistance(double)));
 
 
 

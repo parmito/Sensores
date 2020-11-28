@@ -23,7 +23,7 @@ protected:
 
 public slots:
     void SlotReceiveSpeed(QString);
-    void SlotReceiveDistance(long);
+    void SlotReceiveDistance(double);
     void SlotReceiveSoundCheckBox(int state);
 
 private:
@@ -39,6 +39,7 @@ private:
 
     DigitalDisplay *Odometer;
     double dOdometer;
+    long lNumberOfSamples;
 };
 
 #endif // INSTRUMENTPANEL_H

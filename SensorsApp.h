@@ -39,7 +39,7 @@ signals:
     void cppSendLongitude(QString);
     void cppSendAltitude(QString);
     void cppSendSpeed(QString);
-    void cppSendDistance(long);
+    void cppSendDistance(double);
 
 
 public slots:
@@ -58,11 +58,9 @@ private:
     int theValue;
     QTimer *myTimer;
     qreal x;
-    double CurrentLatitude,CurrentLongitude,PreviousLatitude,PreviousLongitude,lDistance;
+    double CurrentLatitude,CurrentLongitude,PreviousLatitude,PreviousLongitude,dDistance;
     long double toRadians(const long double degree);
     long double distance(long double lat1, long double long1,long double lat2, long double long2);
-
-
 
 };
 #endif /* SENSORSAPP_H_ */
