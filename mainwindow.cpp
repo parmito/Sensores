@@ -19,6 +19,8 @@
 #include <QLineSeries>
 #include <QLabel>
 #include <QCamera>
+#include <QQmlContext>
+#include <Navigation.h>
 
 #include <QPushButton>
 #include <QStackedLayout>
@@ -29,6 +31,10 @@
 #include <QIcon>
 #include <QDockWidget>
 #include <QCheckBox>
+#include <QTimer>
+#include <QGeoPath>
+#include <QQmlApplicationEngine>
+#include <pathcontroller.h>
 
 #define PRIMEIRA_VERSAO 0
 #define SEGUNDA_VERSAO 0
@@ -51,7 +57,23 @@ MainWindow::MainWindow(QWidget *parent)
     view->setSource(QUrl("qrc:///main.qml"));
 
     QObject *object = view->rootObject();*/
+
+    QQuickView *view = new QQuickView();
+    QWidget *container = QWidget::createWindowContainer(view, this);
+    container->setParent(this);
+    container->setFocusPolicy(Qt::TabFocus);
+
+    Navigation *data = new Navigation();
+
+    view->rootContext()->setContextProperty("applicationData", data);
+    view->setSource(QUrl("qrc:///main.qml"));
+
     SensorsApp *sensor = new SensorsApp();
+
+
+    QGridLayout *pFirstLayout = new QGridLayout();
+    pFirstLayout->addWidget(container);
+
 
    /* QLineSeries *series = new QLineSeries();
     series->append(0, 6);
@@ -110,27 +132,26 @@ MainWindow::MainWindow(QWidget *parent)
 
     QWidget *firstTab = new QWidget();
     QWidget *secondTab = new QWidget();
-    QWidget *thirdTab = new QWidget();
-    QWidget *fourthTab = new QWidget();
+    /*QWidget *thirdTab = new QWidget();*/
+    /*QWidget *fourthTab = new QWidget();*/
 
-    SensorsGraph *pSensorGraphAccelX = new SensorsGraph(this,"Accelerometer: x",QChart::ChartThemeLight);
+    /*SensorsGraph *pSensorGraphAccelX = new SensorsGraph(this,"Accelerometer: x",QChart::ChartThemeLight);
     SensorsGraph *pSensorGraphAccelY = new SensorsGraph(this,"Accelerometer: y",QChart::ChartThemeLight);
     SensorsGraph *pSensorGraphAccelZ = new SensorsGraph(this,"Accelerometer: z",QChart::ChartThemeLight);
-    SensorsGraph *pSensorGraphRnd = new SensorsGraph(this,"Randomico",QChart::ChartThemeLight);
+    SensorsGraph *pSensorGraphRnd = new SensorsGraph(this,"Randomico",QChart::ChartThemeLight);*/
 
     QPen penBlue(Qt::blue, 4, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin);
     QPen penGreen(Qt::green, 4, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin);
     QPen penRed(Qt::red, 4, Qt::DashDotLine, Qt::RoundCap, Qt::RoundJoin);
-    pSensorGraphAccelX->setPen(penBlue);
+    /*pSensorGraphAccelX->setPen(penBlue);
     pSensorGraphAccelY->setPen(penGreen);
-    pSensorGraphAccelZ->setPen(penRed);
+    pSensorGraphAccelZ->setPen(penRed);*/
 
-    QGridLayout *pFirstLayout = new QGridLayout();
-    pFirstLayout->addWidget(pSensorGraphAccelX->Chart());
+    /*QGridLayout *pFirstLayout = new QGridLayout();*/
+    /*pFirstLayout->addWidget(pSensorGraphAccelX->Chart());
     pFirstLayout->addWidget(pSensorGraphAccelY->Chart());
-    pFirstLayout->addWidget(pSensorGraphAccelZ->Chart());
+    pFirstLayout->addWidget(pSensorGraphAccelZ->Chart());*/
     firstTab->setLayout(pFirstLayout);
-
 
     /*****************************************************
      *
@@ -147,8 +168,9 @@ MainWindow::MainWindow(QWidget *parent)
 
 
    /* pSecondLayout->addWidget(checkBoxSound);*/
-    pSecondLayout->addWidget(cluster);
+    pSecondLayout->addWidget(cluster);    
     secondTab->setLayout(pSecondLayout);
+    secondTab->setStyleSheet("background-color: black;");
 
 
     /*****************************************************
@@ -158,7 +180,7 @@ MainWindow::MainWindow(QWidget *parent)
      *
      *
      ****************************************************/
-    QGridLayout *pThirdLayout = new QGridLayout();
+    /*QGridLayout *pThirdLayout = new QGridLayout();*/
    /* pThirdLayout->addWidget(pSensorGraphAccelZ->Chart());*/
 
 #if 0
@@ -225,9 +247,9 @@ MainWindow::MainWindow(QWidget *parent)
      *
      *
      ****************************************************/
-    QGridLayout *pFourthLayout = new QGridLayout();
+    /*QGridLayout *pFourthLayout = new QGridLayout();*/
    /* pFourthLayout->addWidget(pSensorGraphRnd->Chart());*/
-    fourthTab->setLayout(pFourthLayout);
+    /*fourthTab->setLayout(pFourthLayout);*/
 
     QDockWidget *dock = new QDockWidget(tr("Verwaltung"), this);
     /*dock->setFeatures(QDockWidget::DockWidgetMovable);*/
@@ -261,8 +283,8 @@ MainWindow::MainWindow(QWidget *parent)
         carList->addItem(item);
     }
 
-    pFourthLayout->addWidget(carList);
-    fourthTab->setLayout(pFourthLayout);
+   /* pFourthLayout->addWidget(carList);
+    fourthTab->setLayout(pFourthLayout);*/
 
 
     /*****************************************************
@@ -279,10 +301,18 @@ MainWindow::MainWindow(QWidget *parent)
 
 
     QTabWidget *tabWidget = new QTabWidget();
-    tabWidget->addTab(firstTab,"Acelerômetro");
+    tabWidget->addTab(firstTab,"Mapa");
     tabWidget->addTab(secondTab,"Velocidade");
-    tabWidget->addTab(thirdTab,"Solido");
-    tabWidget->addTab(fourthTab,"QWidgetList");
+    tabWidget->setStyleSheet("color: black;"
+                                "background-color: lightgray;"
+                                "border-color: ligthgray;"
+                                "text-decoration:none;"
+                                "border-radius: 20px;"
+                                "padding: 6px;"
+                                "border-style:none;");
+
+    /*tabWidget->addTab(thirdTab,"Solido");*/
+    /*tabWidget->addTab(fourthTab,"QWidgetList");*/
 
 
     this->layout()->setMenuBar(toolBar);
@@ -290,12 +320,24 @@ MainWindow::MainWindow(QWidget *parent)
     tabWidget->setCurrentIndex(0);
     this->setWindowTitle("Mobile Sensors");
 
-    connect(sensor, SIGNAL(cppSendSpeed(QString)),
+    connect(sensor, SIGNAL(cppSendLatLongAltSpeedTimestampDistance(QString,QString,QString,QString,QString,double)),
+                     cluster, SLOT(SlotReceiveLatLongAltSpeedTimestampDistance(QString,QString,QString,QString,QString,double)));
+
+    connect(sensor, SIGNAL(cppSendLatLongAltSpeedTimestampDistance(QString,QString,QString,QString,QString,double)),
+                     data, SLOT(cppReceiveLatLongAltSpeedTimestampDistance(QString,QString,QString,QString,QString,double)));
+
+    connect(this, SIGNAL(cppSendEndKmlFile(void)),
+                     cluster, SLOT(SlotReceiveEndKmlFile()));
+
+
+    /*connect(sensor, SIGNAL(cppSendSpeed(QString)),
                      cluster, SLOT(SlotReceiveSpeed(QString)));
 
     connect(sensor, SIGNAL(cppSendDistance(double)),
                      cluster, SLOT(SlotReceiveDistance(double)));
 
+    connect(sensor, SIGNAL(cppSendTimestamp(QString)),
+                     cluster, SLOT(SlotReceiveTimestamp(QString)));*/
 
 
 
@@ -327,17 +369,13 @@ MainWindow::MainWindow(QWidget *parent)
 
 #endif
 
-      QTimer *myTimer = new QTimer(this);
-      connect(myTimer, SIGNAL (timeout()), pSensorGraphRnd, SLOT (UpdateSlot()));
-      connect(myTimer, SIGNAL (timeout()), sensor, SLOT (positionUpdate()));
-      myTimer->start(1000);
 
 
     /*QObject::connect(sensor, SIGNAL(cppSendAccelX(QString)),
                      object->findChild<QObject *>("txtInputAccelX"), SIGNAL(qmlReceiveAccelX(QString)));*/
 
-    QObject::connect(sensor, SIGNAL(cppSignalNumberAccelX(qreal)),
-                     pSensorGraphAccelX, SLOT(AccelerometerUpdate(qreal)));
+    /*QObject::connect(sensor, SIGNAL(cppSignalNumberAccelX(qreal)),
+                     pSensorGraphAccelX, SLOT(AccelerometerUpdate(qreal)));*/
 
     /*QObject::connect(sensor, SIGNAL(cppSendAccelXInt(qreal,qreal)),
                      object->findChild<QObject *>("LineSeries"), SIGNAL(qmlReceiveLineSeries(qreal,qreal)));*/
@@ -345,14 +383,14 @@ MainWindow::MainWindow(QWidget *parent)
     /*QObject::connect(sensor, SIGNAL(cppSendAccelY(QString)),
                      object->findChild<QObject *>("txtInputAccelY"), SIGNAL(qmlReceiveAccelY(QString)));*/
 
-    QObject::connect(sensor, SIGNAL(cppSignalNumberAccelY(qreal)),
-                     pSensorGraphAccelY, SLOT(AccelerometerUpdate(qreal)));
+    /*QObject::connect(sensor, SIGNAL(cppSignalNumberAccelY(qreal)),
+                     pSensorGraphAccelY, SLOT(AccelerometerUpdate(qreal)));*/
 
    /* QObject::connect(sensor, SIGNAL(cppSendAccelZ(QString)),
                      object->findChild<QObject *>("txtInputAccelZ"), SIGNAL(qmlReceiveAccelZ(QString)));*/
 
-    QObject::connect(sensor, SIGNAL(cppSignalNumberAccelZ(qreal)),
-                     pSensorGraphAccelZ, SLOT(AccelerometerUpdate(qreal)));
+   /* QObject::connect(sensor, SIGNAL(cppSignalNumberAccelZ(qreal)),
+                     pSensorGraphAccelZ, SLOT(AccelerometerUpdate(qreal)));*/
 
     /*QObject::connect(sensor, SIGNAL(cppSendAltitude(QString)),
                      object->findChild<QObject *>("txtInputAltitude"), SIGNAL(qmlReceiveAltitude(QString)));*/
@@ -405,7 +443,11 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 MainWindow::~MainWindow()
-{
-    delete ui;
+{    
+    emit MainWindow::cppSendEndKmlFile();
+
+    qDebug() << "Delete ui";
+
+    delete ui;    
 }
 

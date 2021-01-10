@@ -2,11 +2,13 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-CONFIG += c++11
+CONFIG += c++11 /
+          qmltypes
 
 # You can make your code fail to compile if it uses deprecated APIs.
 # In order to do so, uncomment the following line.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+
 
 QT += qml quick \
       sensors \
@@ -21,11 +23,13 @@ QT += qml quick \
       3dinput \
       3dlogic \
       3danimation \
+      androidextras \
 
 
 SOURCES += \
     DigitalDisplay.cpp \
     Instrumentpanel.cpp \
+    Navigation.cpp \
     PieChart.cpp \
     SensorsApp.cpp \
     SensorsGraph.cpp \
@@ -35,6 +39,7 @@ SOURCES += \
 HEADERS += \
     DigitalDisplay.h \
     Instrumentpanel.h \
+    Navigation.h \
     PieChart.h \
     SensorsApp.h \
     SensorsGraph.h \
@@ -58,7 +63,7 @@ DISTFILES += \
     android/gradlew \
     android/gradlew.bat \
     android/res/values/libs.xml \
-    main.qml
+    main.qml \    
 
 RESOURCES += \
     qml.qrc
@@ -76,3 +81,4 @@ contains(ANDROID_TARGET_ARCH,) {
     ANDROID_ABIS = \
         armeabi-v7a
 }
+android: include(/home/danilo/Android/Sdk/android_openssl/openssl.pri)

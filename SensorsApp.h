@@ -33,21 +33,11 @@ signals:
     void cppSignalNumberAccelZ(qreal);
     void cppSendAccelZInt(qreal,qreal);
 
-
-    void cppSendTimestamp(QString);
-    void cppSendLatitude(QString);
-    void cppSendLongitude(QString);
-    void cppSendAltitude(QString);
-    void cppSendSpeed(QString);
-    void cppSendDistance(double);
-
-
+    void cppSendLatLongAltSpeedTimestampDistance(QString,QString,QString,QString,QString,double);
 public slots:
     void compassReadingChanged();
-    void accelerometerReadingChanged();
-    void altimeterReadingChanged();
-    /*void PeriodicFunction();*/
-    void positionUpdated(const QGeoPositionInfo &info);
+    void accelerometerReadingChanged(); 
+    void positionUpdate(const QGeoPositionInfo &info);
     void temperatureUpdated();
 private:
     QCompass *m_CompassSensor;    
@@ -58,7 +48,7 @@ private:
     int theValue;
     QTimer *myTimer;
     qreal x;
-    double CurrentLatitude,CurrentLongitude,PreviousLatitude,PreviousLongitude,dDistance;
+    double CurrentLatitude,CurrentLongitude,PreviousLatitude,PreviousLongitude,dDistance,dPreviousSpeed;
     long double toRadians(const long double degree);
     long double distance(long double lat1, long double long1,long double lat2, long double long2);
 

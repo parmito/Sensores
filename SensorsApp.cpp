@@ -15,29 +15,29 @@ SensorsApp::SensorsApp(QObject *parent)
     CurrentLatitude = CurrentLongitude = PreviousLatitude = PreviousLongitude = 0;
 
     // Create the compass sensor
-    m_CompassSensor = new QCompass(this);
+    /*m_CompassSensor = new QCompass(this);
     m_AccelerometerSensor =  new QAccelerometer(this);
     m_AltimeterSensor =  new QAltimeter(this);
-    m_AmbientTemperatureSensor = new QAmbientTemperatureSensor(this);
+    m_AmbientTemperatureSensor = new QAmbientTemperatureSensor(this);*/
 
     QGeoPositionInfoSource *m_GeoPositionSensor = QGeoPositionInfoSource::createDefaultSource(this);
 
     if (m_GeoPositionSensor) {
                connect(m_GeoPositionSensor, SIGNAL(positionUpdated(QGeoPositionInfo)),
-                       this, SLOT(positionUpdated(QGeoPositionInfo)));
+                       this, SLOT(positionUpdate(QGeoPositionInfo)));
                m_GeoPositionSensor->startUpdates();
            }
 
-    if(m_AmbientTemperatureSensor){
+    /*if(m_AmbientTemperatureSensor){
         qDebug() << "Ambient Temperature Sensor exists";
         connect(m_AmbientTemperatureSensor, SIGNAL(readingChanged()),
                 this, SLOT(temperatureUpdated()));
-    }
+    }*/
 
     // Set the orientation mode to fixed so that sensor
     // readings aren't affected by device orientation
-    m_CompassSensor->setAxesOrientationMode
-                        (QCompass::FixedOrientation);
+    /*m_CompassSensor->setAxesOrientationMode
+                        (QCompass::FixedOrientation);*/
 
     /*bool res = connect(m_CompassSensor,
                        SIGNAL(readingChanged()),
@@ -45,25 +45,28 @@ SensorsApp::SensorsApp(QObject *parent)
                        SLOT(compassReadingChanged()));*/
 
 
-    m_AccelerometerSensor->setAccelerationMode(QAccelerometer::Combined);
+   /* m_AccelerometerSensor->setAccelerationMode(QAccelerometer::Combined);
 
     bool res = connect(m_AccelerometerSensor,
                        SIGNAL(readingChanged()),
                        this,
-                       SLOT(accelerometerReadingChanged()));
+                       SLOT(accelerometerReadingChanged()));*/
 
     /*res = connect(m_AltimeterSensor,
                        SIGNAL(readingChanged()),
                        this,
                        SLOT(altimeterReadingChanged()));*/
-    Q_ASSERT(res);
-    Q_UNUSED(res);
 
-    m_CompassSensor->start();
-    m_AccelerometerSensor->start();
+    /*Q_ASSERT(res);
+    Q_UNUSED(res);*/
+
+    /*m_CompassSensor->start();*/
+    /*m_AccelerometerSensor->start();*/
     /*m_AltimeterSensor->start();*/
-    m_AmbientTemperatureSensor->start();
+    /*m_AmbientTemperatureSensor->start();*/
 
+    dDistance = 0;
+    dPreviousSpeed = 0;
 }
 
 void SensorsApp::compassReadingChanged()
@@ -131,66 +134,70 @@ void SensorsApp::accelerometerReadingChanged()
     }
 }
 
-void SensorsApp::altimeterReadingChanged()
-{
-    QAltimeterReading *reading = m_AltimeterSensor->reading();
-    static qreal PreviousAltitude = 0;
-
-    if(reading != nullptr)
-    {
-
-        qreal altitude = reading->altitude();
-        qDebug() << "The altitude is" << altitude << "meters.";
-
-        if (altitude != PreviousAltitude) emit SensorsApp::cppSendAltitude(QString::number(altitude));
-    }
-}
-
-
- /*void SensorsApp::PeriodicFunction() {
-    qDebug() << "PeriodicFunction()";
-}*/
-
-
-void SensorsApp::positionUpdated(const QGeoPositionInfo &info)
+void SensorsApp::positionUpdate(const QGeoPositionInfo &info)
 {
     qDebug() << "Position updated:" << info;
 
     QDateTime timestamp = info.timestamp();
-    /*QDate Day = timestamp.date();*/
     QDateTime Time = timestamp.toLocalTime();
+    /*emit SensorsApp::cppSendTimestamp(Time.toString());*/
 
-    QGeoCoordinate position = info.coordinate();
+    QGeoCoordinate position = info.coordinate();   
+    double altitude;
+    double speed;
 
-    CurrentLatitude = position.latitude();
-    CurrentLongitude= position.longitude();
-    double altitude = (qint32)(position.altitude()*10);
-    int speed = (qint32)(info.attribute(QGeoPositionInfo::GroundSpeed)*36);
-
-    altitude = altitude/10;
-    speed = speed/10;
-
-    if((PreviousLatitude != 0) && (PreviousLongitude != 0))
+    if(position.type() == QGeoCoordinate::Coordinate3D)
     {
-        if((CurrentLatitude != PreviousLatitude) || (CurrentLongitude != PreviousLongitude))
-        {
-            dDistance = distance(PreviousLatitude, PreviousLongitude,
-                                 CurrentLatitude, CurrentLongitude);
-        }
-    }
+        CurrentLatitude = position.latitude();
+        CurrentLongitude= position.longitude();
 
-    PreviousLatitude = CurrentLatitude;
-    PreviousLongitude= CurrentLongitude;
+        altitude = (qint32)(position.altitude()*10);
+        altitude = altitude/10;
 
+        speed = (double)(info.attribute(QGeoPositionInfo::GroundSpeed)*36);
+        speed = speed/10;
+
+        int iSpeed = int(speed);
 #ifdef QT_DEBUG
-    speed = QRandomGenerator::global()->bounded(220);
+        iSpeed = QRandomGenerator::global()->bounded(120);
 #endif
-    emit SensorsApp::cppSendTimestamp(Time.toString());
-    emit SensorsApp::cppSendLatitude(QString::number(CurrentLatitude));
-    emit SensorsApp::cppSendLongitude(QString::number(CurrentLongitude));
-    emit SensorsApp::cppSendAltitude(QString::number(altitude));
-    emit SensorsApp::cppSendSpeed(QString::number(speed));    
-    emit SensorsApp::cppSendDistance(dDistance);
+
+        if(position.isValid() == true)
+        {                        
+            /*emit SensorsApp::cppSendSpeed(QString::number(iSpeed));*/
+
+            /*qDistance = position.distanceTo(QGeoCoordinate(PreviousLatitude, PreviousLongitude));
+            qDistance = (qDistance/1000);
+            dDistance = qDistance;*/
+            if((PreviousLatitude != 0) && (PreviousLongitude != 0))
+            {
+                if((CurrentLatitude != PreviousLatitude) || (CurrentLongitude != PreviousLongitude))
+                {
+                    dDistance = distance(PreviousLatitude, PreviousLongitude,
+                                         CurrentLatitude, CurrentLongitude);
+
+                    double dSecondDistance;
+                    if(speed <= dPreviousSpeed)
+                    {
+                        dSecondDistance = (speed/3.6) +  (((dPreviousSpeed - speed)/2)/3.6);
+                    }
+                    else
+                    {
+                        dSecondDistance = (speed/3.6) +  (((speed - dPreviousSpeed)/2)/3.6);
+                    }
+
+                    if(dDistance > dSecondDistance) dDistance = dSecondDistance;
+
+                    dPreviousSpeed = speed;
+                }
+
+                emit SensorsApp::cppSendLatLongAltSpeedTimestampDistance(QString::number(CurrentLatitude),QString::number(CurrentLongitude),QString::number(altitude),QString::number(iSpeed),Time.toString(),dDistance);
+                /*emit SensorsApp::cppSendDistance(dDistance);*/
+            }
+        }    
+        PreviousLatitude = CurrentLatitude;
+        PreviousLongitude= CurrentLongitude;
+    }
 }
 
 void SensorsApp::temperatureUpdated()
@@ -211,6 +218,7 @@ long double SensorsApp::toRadians(long double degree)
     long double one_deg = (M_PI) / 180;
     return (one_deg * degree);
 }
+
 
 long double SensorsApp::distance(long double lat1, long double long1,
                      long double lat2, long double long2)
@@ -243,3 +251,4 @@ long double SensorsApp::distance(long double lat1, long double long1,
 
     return ans;
 }
+
